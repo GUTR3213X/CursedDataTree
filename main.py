@@ -76,22 +76,22 @@ class Main:
             'Escolha uma opção para criar:', end=''
             ),
             actions.display(
-            Action('r', 'Criar raiz', self.criar_root),
-            Action('n', 'Criar nó', self.criar_node),
+            Action('1', 'Criar raiz', self.criar_root),
+            Action('2', 'Criar nó', self.criar_node),
             Action('', 'Cancelar', do_nothing)
             )
             ),
             Action('d', 'Deletar', 
             lambda: self.print('Escolha uma opção para deletar:'),
             actions.display(
-            Action('r', 'Deletar raiz', 
+            Action('1', 'Deletar raiz', 
             lambda: self.print('Tem certeza que deseja deletar a raiz?'),
             actions.display(
             Action('s', 'Sim', self.remover_root),
             Action(('n', ignore), 'Não', do_nothing)
             )
             ),
-            Action('n', 'Deletar nó', 
+            Action('2', 'Deletar nó', 
             lambda: self.print('Tem certeza que deseja deletar o nó?'),
             actions.display(
             Action('s', 'Sim', self.remover_node),
@@ -100,12 +100,14 @@ class Main:
             ),
             Action('', 'Cancelar', do_nothing)
             )),
-            Action('e', 'Expandir/Colapsar nó', self.enc_desenc_node),
+            Action('e', 'Expandir/Colapsar nó', self.toggle_node),
             Action('w', 'Mover para cima', self.mover(-1)),
             Action('s', 'Mover para baixo', self.mover(1)),
+            Action('v', 'Visualizar dados', self.visualizar_dados),
+            Action('x', 'Editar campo', self.editar_campo),
             Action('f', 'Arquivo', actions.display(
-            Action('s', 'Salvar arquivo', self.salvar),
-            Action('l', 'Carregar arquivo', self.carregar),
+            Action('1', 'Salvar arquivo', self.salvar),
+            Action('2', 'Carregar arquivo', self.carregar),
             Action('', 'Cancelar', do_nothing)
             )),
             Action('q', 'Parar execução', self.stop),
@@ -137,7 +139,15 @@ class Main:
         chave = self.input('Chave: ')
         valor = self.input('Valor: ')
         self.selecionado()[chave] = valor
-    def enc_desenc_node(self):
+    def visualizar_dados(self):
+        maior_chave = max(len(str(k)) for k in self.selecionado().data.keys())
+        maior_valor = max(len(str(v)) for v in self.selecionado().data.values())
+        l = max(maior_chave, 1)
+        r = max(maior_valor, 2)
+        for k, v in self.selecionado().data.items():
+            self.print(f'{str(k):.<{l}}{str(v):.>{r}} ({type(v).__name__})')
+        self.input('Precione <ENTER> para continuar. ')
+    def toggle_node(self):
         node = self.selecionado()
         match node['closed']:
             case False:
@@ -146,6 +156,7 @@ class Main:
                 node['closed'] = False
             case _:
                 pass
+    # Cursor
     def mover(self, n: int):
         def wrapper():
             self.desselecionar()
@@ -156,7 +167,6 @@ class Main:
             while Nodes.verify1(self.selecionado().parents + [self.selecionado()], PARENT_IS_CLOSED):
                 mov()
         return wrapper
-    # Cursor
     def limite(self):
         return len(self.super.all) - 1
     def normalizar(self):
